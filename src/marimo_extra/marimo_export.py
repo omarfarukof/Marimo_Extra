@@ -1,7 +1,13 @@
-#!/usr/bin/env python3
-
 import os
 import subprocess
+# import marimo_export.utils
+from marimo_extra.utils import rich_print
+
+try:
+    import marimo
+except ImportError:
+    rich_print("[red]Error:[end] [green][italic]Marimo[end] Library is not installed!")
+    exit(1)
 
 format_ext = {
     "html": ".html",
@@ -128,10 +134,10 @@ def export_app(notebook_path: str, output: str=None) -> bool:
 
 
 # # For Testing
-# if __name__ == "__main__":
-#     export(notebook_path="notebooks/fibonacci.py", output="notebooks/web/fibonacci.html")
-#     export_executable(notebook_path="notebooks/fibonacci.py", output="notebooks/web/fibonacci_exe.html")
-#     export_editable(notebook_path="notebooks/fibonacci.py", output="notebooks/web/fibonacci_edit.html")
-#     export_app(notebook_path="notebooks/fibonacci.py", output="notebooks/web/fibonacci_app.html")
+if __name__ == "__main__":
+    export(notebook_path="notebooks/fibonacci.py", output="_site/notebooks/fibonacci.html")
+    export_executable(notebook_path="notebooks/fibonacci.py", output="_site/notebooks/fibonacci_exe.html")
+    export_editable(notebook_path="notebooks/fibonacci.py", output="_site/notebooks/fibonacci_edit.html")
+    export_app(notebook_path="notebooks/fibonacci.py", output="_site/notebooks/fibonacci_app.html")
 
-#     pass
+    pass

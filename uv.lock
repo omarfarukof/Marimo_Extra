@@ -447,7 +447,7 @@ wheels = [
 ]
 
 [[package]]
-name = "marimo-export"
+name = "marimo-extra"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

@@ -1,12 +1,12 @@
 import os
 import subprocess
-# import marimo_export.utils
 from marimo_extra.utils import rich_print
 
 try:
     import marimo
 except ImportError:
-    rich_print("[red]Error:[end] [green][italic]Marimo[end] Library is not installed!")
+    rich_print("[red]Error:[end] Python [green][italic]Marimo[end] Library is not installed!")
+    rich_print("Please install it with \"[italic][yellow] uv add marimo [end]\" or \"[italic] pip install marimo [end]\" command.")
     exit(1)
 
 format_ext = {
@@ -91,17 +91,18 @@ def export(
     os.makedirs(os.path.dirname(output), exist_ok=True)
     try:
         subprocess.run(cmd, capture_output=True, text=True, check=True)
-        print(f"Exported {notebook_path} to {output}")
+        rich_print(f"[green]Successfully Exported[end] {notebook_path} to {output}")
         return True
     except subprocess.CalledProcessError as e:
-        print(f"Error exporting {notebook_path}:")
+        rich_print(f"[red]Error exporting {notebook_path}[end]:")
         print(e.stderr)
         return False
     except Exception as e:
-        print(f"Unexpected error exporting {notebook_path}: {e}")
+        rich_print(f"[red]Unexpected error exporting[end] {notebook_path}: {e}")
         return False
 
 def export_executable(notebook_path: str, output: str=None, watch=False, sandbox=False) -> bool:
+    rich_print(f"\n[yellow]Exporting[end] to [blue]Executable[end]: {notebook_path}")
     return export(
         notebook_path=notebook_path,
         output=output,
@@ -114,6 +115,7 @@ def export_executable(notebook_path: str, output: str=None, watch=False, sandbox
     )
 
 def export_editable(notebook_path: str, output: str=None, watch=False) -> bool:
+    rich_print(f"\n[yellow]Exporting[end] to [blue]Editable[end]: {notebook_path}")
     return export(
         notebook_path=notebook_path,
         output=output,
@@ -124,6 +126,7 @@ def export_editable(notebook_path: str, output: str=None, watch=False) -> bool:
     )
 
 def export_app(notebook_path: str, output: str=None) -> bool:
+    rich_print(f"\n[yellow]Exporting[end] to [blue]App[end]: {notebook_path}")
     return export(
         notebook_path=notebook_path,
         output=output,
@@ -133,11 +136,12 @@ def export_app(notebook_path: str, output: str=None) -> bool:
     )
 
 
+def test(file_name):
+    export(notebook_path=file_name, output=f"_site/{file_name.replace('.py', '')}.html")
+    export_executable(notebook_path=file_name, output=f"_site/{file_name.replace('.py', '')}_exe.html")
+    export_editable(notebook_path=file_name, output=f"_site/{file_name.replace('.py', '')}_edit.html")
+    export_app(notebook_path=file_name, output=f"_site/{file_name.replace('.py', '')}_app.html")
+
 # # For Testing
 if __name__ == "__main__":
-    export(notebook_path="notebooks/fibonacci.py", output="_site/notebooks/fibonacci.html")
-    export_executable(notebook_path="notebooks/fibonacci.py", output="_site/notebooks/fibonacci_exe.html")
-    export_editable(notebook_path="notebooks/fibonacci.py", output="_site/notebooks/fibonacci_edit.html")
-    export_app(notebook_path="notebooks/fibonacci.py", output="_site/notebooks/fibonacci_app.html")
-
-    pass
+    test("notebooks/fibonacci.py")

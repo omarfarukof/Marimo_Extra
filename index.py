@@ -18,19 +18,15 @@ def _():
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _(mo, notebooks_dict):
     mo.sidebar(
         [
-            mo.md("# marimo"),
+            mo.md("# Marimo Extra"),
             mo.nav_menu(
                 {
-                    "#home": f"{mo.icon('lucide:home')} Home",
+                    "/index.html": f"{mo.icon('lucide:home')} Home",
+                    f"{mo.icon('lucide:book')} Notebooks": notebooks_dict,
                     "#about": f"{mo.icon('lucide:user')} About",
-                    "#contact": f"{mo.icon('lucide:phone')} Contact",
-                    "Links": {
-                        "https://twitter.com/marimo_io": "Twitter",
-                        "https://github.com/marimo-team/marimo": "GitHub",
-                    },
                 },
                 orientation="vertical",
             ),
@@ -73,9 +69,23 @@ def _(me, pd):
 
 
 @app.cell
+def _(notebooks):
+    names = notebooks['Name'].values
+    paths = '/'+notebooks['Path'].values
+    notebooks_dict = dict(zip(paths, names))
+    notebooks_dict
+    return names, notebooks_dict, paths
+
+
+@app.cell
 def _():
     # for notebook in notebooks:
     #     print("Name: " , notebook[0], "Link: ", notebook[1], "Types: ", notebook[2], "Thumbnail: ", notebook[3], "Tags: ", notebook[4])
+    return
+
+
+@app.cell
+def _():
     return
 
 

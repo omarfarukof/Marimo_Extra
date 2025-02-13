@@ -69,9 +69,9 @@ def _(me, pd):
 
 
 @app.cell
-def _(notebooks):
+def _(mo, notebooks):
     names = notebooks['Name'].values
-    paths = '/'+notebooks['Path'].values
+    paths = str(mo.notebook_location())+'/'+notebooks['Path'].values
     notebooks_dict = dict(zip(paths, names))
     notebooks_dict
     return names, notebooks_dict, paths

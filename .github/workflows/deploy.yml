@@ -28,8 +28,7 @@ jobs:
 
       - name: 📦 Install dependencies
         run: |
-          uv add marimo --dev git+https://github.com/omarfarukof/Marimo_Extra.git
-
+          uv add marimo
       - name: 🛠️ Export notebooks
         run: |
           uv run scripts/website_build.py

@@ -1,67 +1,134 @@
 import os
-
+import shutil
 from pathlib import Path
 import pandas as pd
 
-from marimo_extra.marimo_export import export, export_app, export_editable, export_executable
+from marimo_extra.marimo_export import export, export_app, export_editable, export_executable, export_html
 from marimo_extra.utils import rich_print
 
-def collect_notebooks_info(directorys: list[str]):
+def collect_notebooks_info(directories: list[str]):
+    """
+    Collects information about Python notebook files in the specified directories.
+
+    This function searches through the given list of directories, recursively 
+    finding all Python files (files with a '.py' extension) and compiles a list 
+    of dictionaries containing the directory name and file path for each notebook.
+
+    Args:
+        directories (list[str]): A list of directory paths to search for notebooks.
+
+    Returns:
+        list[dict]: A list of dictionaries where each dictionary contains:
+            - 'dir': The directory name where the notebook was found.
+            - 'path': The full file path to the notebook.
+    """
     all_notebooks = []
-    for directory in directorys:
+    for directory in directories:
         dir_path = Path(directory)
         if not dir_path.exists():
             print(f"Warning: Directory not found: {dir_path}")
-            continue
-        notebooks = [{"dir":directory, "path":str(path)} for path in dir_path.rglob("*.py")]
-        all_notebooks.extend(notebooks)
+        else:
+            notebooks = [{"dir":directory, "path":str(path)} for path in dir_path.rglob("*.py")]
+            all_notebooks.extend(notebooks)
     return all_notebooks
 
 def export_notebook(notebook_path: str, notebook_type: str , output_dir: str="_site") -> bool:
-    if notebook_type.lower() in ["apps", "app"]:
+    """
+    Exports a notebook based on the given notebook type.
+
+    Args:
+        notebook_path (str): The path to the notebook file.
+        notebook_type (str): The type of notebook to export. Can be one of:
+            - 'app': Export an executable notebook.
+            - 'edit': Export an editable notebook.
+            - 'exe': Export a statically linked executable notebook.
+            - 'html': Export an HTML notebook.
+            - 'html-save': Export an HTML notebook from `__marimo__` save the generated HTML 
+                to a file.
+        output_dir (str): The directory where the exported notebook will be
+            saved. Defaults to "_site".
+
+    Returns:
+        bool: True if the notebook was exported successfully, False otherwise.
+    """
+    if notebook_type == "app":
         return export_app(notebook_path=notebook_path, output=os.path.join(output_dir, notebook_path.replace(".py", ".html")))
-    elif notebook_type.lower() in ["edit", "editable", "editables"]:
+    elif notebook_type == "edit":
         return export_editable(notebook_path=notebook_path, output=os.path.join(output_dir, notebook_path.replace(".py", ".html")))
-    elif notebook_type.lower() in ["run", "exe", "executable", "executables"]:
+    elif notebook_type == "exe":
         return export_executable(notebook_path=notebook_path, output=os.path.join(output_dir, notebook_path.replace(".py", ".html")))
-    return export(notebook_path=notebook_path, output=os.path.join(output_dir, notebook_path.replace(".py", ".html")))
+    elif notebook_type == "html":
+        return export_html(notebook_path=notebook_path, output=os.path.join(output_dir, notebook_path.replace(".py", ".html")))
+    elif notebook_type == "html-save":
+        return export_html(notebook_path=notebook_path, output=os.path.join(output_dir, notebook_path.replace(".py", ".html")), from_saved=True)
+    else:
+        rich_print(f"[red]Error:[end] Unknown notebook type: {notebook_type}")
+    return False
 
-def export_all_notebooks(notebooks: list[str], output_dir: str="_site") -> bool:
-    output_csv = os.path.join("public" , "index.csv")
-    if os.path.exists(output_csv):
-        rich_print(f"[yellow]Collecting Index[end] from: {output_csv}")
-        notebooks = pd.read_csv(output_csv).values
-        for notebook in notebooks:
-            rich_print(f"[yellow]Info::[end] Name: {notebook[0]} | Path: {notebook[1]} | Type: {notebook[2]} | Thumbnail: {notebook[3]} | Tags: {notebook[4]}")
-            if not export_notebook(notebook_path =notebook[1].replace(".html", ".py"), notebook_type = notebook[2], output_dir=output_dir):
-                return False
-        return True
+def _nb_path_html2py(notebook_path: list[str]) -> str:
+    return [path.replace(".html", ".py") for path in notebook_path]
+def _nb_type_encoder(notebook_type: list[str]) -> str:
+    type_app = ["app", "apps", "application", "applications"]
+    type_exe = ["run", "exe", "executable", "executables"]
+    type_edit = ["edit", "editable", "editor", "editors"]
+    type_html = ["html", "htmls", "website", "websites", "web", "webs"]
+    type_html_save = ["html-save", "htmls-save", "website-save", "websites-save", "web-save", "webs-save", "save", "__marimo__"]
+    
+    out_type = []
+    for nb_type in notebook_type:
+        if nb_type in type_app:
+            out_type.append("app")
+        elif nb_type in type_exe:
+            out_type.append("exe")
+        elif nb_type in type_edit:
+            out_type.append("edit")
+        elif nb_type in type_html:
+            out_type.append("html")
+        elif nb_type in type_html_save:
+            out_type.append("html-save")
+        else:
+            out_type.append("html")
+    return out_type
+def auto_export_notebooks_web(notebook_dir: list[str], output_dir: str="_site" , index_csv_path: str="public/index.csv") -> bool:
+    """
+    Automatically exports notebooks from the specified directories.
 
-    notebooks = collect_notebooks_info(notebooks)
-    for notebook in notebooks:
-        if not export_notebook(notebook_path = notebook["path"], notebook_type = notebook["dir"], output_dir=output_dir):
-            return False
+    This function checks for the existence of an "index.csv" file to determine the
+    notebooks and their types to export. If the file exists, it reads the notebook
+    paths and types from the CSV; otherwise, it collects this information by scanning
+    the provided directories.
+
+    Args:
+        notebook_dir (list[str]): A list of directories to search for notebook files.
+        output_dir (str): The directory where the exported notebook files will be
+            saved. Defaults to "_site".
+        index_csv_path (str): The path to the "index.csv" file. Defaults to "index.csv".
+
+    Returns:
+        bool: True if the notebooks were exported successfully, False otherwise.
+    """
+
+    if os.path.exists(index_csv_path):
+        notebook_df = pd.read_csv(index_csv_path)
+        notebook_path = notebook_df["Path"].values
+        notebook_type = notebook_df["Type"].values
+
+    else:
+        notebook_dict = collect_notebooks_info(notebook_dir)
+        notebook_path = [notebook["path"] for notebook in notebook_dict]
+        notebook_type = [notebook["dir"] for notebook in notebook_dict]
+
+    notebook_path = _nb_path_html2py(notebook_path)
+    notebook_type = _nb_type_encoder(notebook_type)
+    for path, nb_type in zip(notebook_path, notebook_type):
+        export_notebook(notebook_path = path, notebook_type = nb_type, output_dir=output_dir)
     return True
+
 
 def generate_index(output_dir: str="_site") -> bool:
     pass
 
-def test():
-    for notebook in (collect_notebooks_info(["notebooks", "apps"])):
-        print(f"{notebook["dir"]} : {notebook['path']}")
-
-def record_csv(dirs: list[str] , replace: bool=False):
-    output_csv = os.path.join("public" , "index.csv")
-    if os.path.exists(output_csv) and not replace:
-        print(f"Warning: File already exists: {output_csv}")
-        return True
-
-    os.makedirs(os.path.dirname(output_csv), exist_ok=True)
-
-    columns = ["Name", "Path", "Type", "Thumbnail", "Tags"]
-    out = pd.DataFrame(columns=columns)
-    out_dict = collect_notebooks_info(dirs)
-
+def _add_row_csv(out, out_dict):
     for notebook in out_dict:
         path = notebook["path"].replace(".py", ".html")
         name = os.path.basename(path).replace(".py", "").replace(".html", "").capitalize()
@@ -69,26 +136,49 @@ def record_csv(dirs: list[str] , replace: bool=False):
         thumbnail = os.path.join(os.path.dirname(path), "public", "thumbnail", os.path.basename(path).replace(".py", "").replace(".html", "")+".png")
         tags = ""
         out.loc[len(out)] = [name, path, np_type, thumbnail, tags]
-    
-    # Save the DataFrame to a CSV file
+    return out
+def _save_record_csv(out, output_csv):
     try:
         out.to_csv(output_csv, index=False)
         rich_print(f"[green]Successfully Recoded[end] Index to {output_csv}")
+        return True
     except Exception as e:
         rich_print(f"[red]Unexpected error Recording[end] Index: {e}")
         return False
+def record_csv(dirs: list[str] , replace: bool=False):
+    output_csv = os.path.join("public" , "index.csv")
+    if os.path.exists(output_csv) and not replace:
+        rich_print(f"[red]Warning:[end] File already exists: {output_csv}")
+        return True
 
-    return True
+    os.makedirs(os.path.dirname(output_csv), exist_ok=True)
+
+    columns = ["Name", "Path", "Type", "Thumbnail", "Tags"]
+    out_dict = collect_notebooks_info(dirs)
+    out = pd.DataFrame(columns=columns)
+    out = _add_row_csv(out, out_dict)
+    return _save_record_csv(out, output_csv)
 
 
+def test():
+    output_dir = "_site"
+    if os.path.exists(output_dir): 
+        shutil.rmtree(output_dir)
+        rich_print(f"Removed [blue]{output_dir}[end] folder")
+    else:
+        print("No Folder Found")
 
-if __name__ == "__main__":
-    # test()
-    record_csv(["notebooks", "apps"], replace=True)
-    export_all_notebooks(["notebooks", "apps"], output_dir="_site")
+    record_csv(["notebooks", "apps"])
+    auto_export_notebooks_web(["notebooks", "apps"], output_dir=output_dir)
     export(notebook_path="index.py", output="_site/index.html", show_code=False)
+    # export_html(notebook_path="notebooks/fibonacci.py", output="_site/notebooks/fibonacci.html", show_code=False, from_saved=True)
 
     # # Run Server
     # python -m http.server -d _site
     # or
     # uv run python -m http.server -d _site
+    pass
+
+if __name__ == "__main__":
+    test()
+    pass

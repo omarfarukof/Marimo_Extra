@@ -14,7 +14,8 @@ def _(mo):
 def _():
     import marimo as mo
     import pandas as pd
-    return mo, pd
+    import os
+    return mo, os, pd
 
 
 @app.cell(hide_code=True)
@@ -60,21 +61,23 @@ def _():
 
 
 @app.cell
-def _(me, pd):
-    import os
+def _(me, os, pd):
     notebooks = pd.read_csv(os.path.join('public', 'index.csv'))
     notebooks
     me.ui.gallery(data = notebooks)
-    return notebooks, os
+    return (notebooks,)
 
 
 @app.cell
-def _(mo, notebooks):
+def _(mo, notebooks, os):
+
     names = notebooks['Name'].values
-    paths = str(mo.notebook_location())+'/'+notebooks['Path'].values
+    # paths = '/'+notebooks['Path'].values
+    base = os.path.basename(str(mo.notebook_dir()))
+    paths =  '/'+base+'/'+notebooks['Path'].values
     notebooks_dict = dict(zip(paths, names))
     notebooks_dict
-    return names, notebooks_dict, paths
+    return base, names, notebooks_dict, paths
 
 
 @app.cell

@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.11.0"
-app = marimo.App(app_title="Fibonacci Calculator")
+app = marimo.App(app_title="Fibonacci Calculator", auto_download=["html"])
 
 
 @app.cell

@@ -10,23 +10,15 @@ def _(mo):
     return
 
 
-@app.cell
-def _():
-    import marimo as mo
-    import pandas as pd
-    import os
-    return mo, os, pd
-
-
 @app.cell(hide_code=True)
-def _(mo, notebooks_dict):
+def _(me, mo):
     mo.sidebar(
         [
             mo.md("# Marimo Extra"),
             mo.nav_menu(
                 {
                     "/index.html": f"{mo.icon('lucide:home')} Home",
-                    f"{mo.icon('lucide:book')} Notebooks": notebooks_dict,
+                    f"{mo.icon('lucide:book')} Notebooks": me.index_csv_to_nav_dict(),
                     "#about": f"{mo.icon('lucide:user')} About",
                 },
                 orientation="vertical",
@@ -36,60 +28,24 @@ def _(mo, notebooks_dict):
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
+def _(me):
+    me.ui.Gallery(me.index_csv_to_dict())
+    return
+
+
+@app.cell
 def _():
     import marimo_extra as me
     return (me,)
 
 
-@app.cell(hide_code=True)
-def _():
-    # card = [
-    #     me.ui.card(name="Gallary" , thumbnail=None, content="Tag: ML, Python", link="/notebooks/fibonacci.py"),
-    #     me.ui.card(name="Gallary" , thumbnail=None, content="Tag: ML, Python", link="/notebooks/fibonacci.py"),
-
-    #     me.ui.card(name="Gallary" , thumbnail=None, content="Tag: ML, Python", link="/notebooks/fibonacci.py"),
-    #     me.ui.card(name="Gallary" , thumbnail=None, content="Tag: ML, Python", link="/notebooks/fibonacci.py")]
-    # for c in card:
-    #     mo.output.append(c)
-    return
-
-
 @app.cell
 def _():
-    return
-
-
-@app.cell
-def _(me, os, pd):
-    notebooks = pd.read_csv(os.path.join('public', 'index.csv'))
-    notebooks
-    me.ui.gallery(data = notebooks)
-    return (notebooks,)
-
-
-@app.cell
-def _(mo, notebooks, os):
-
-    names = notebooks['Name'].values
-    # paths = '/'+notebooks['Path'].values
-    base = os.path.basename(str(mo.notebook_dir()))
-    paths =  '/'+base+'/'+notebooks['Path'].values
-    notebooks_dict = dict(zip(paths, names))
-    notebooks_dict
-    return base, names, notebooks_dict, paths
-
-
-@app.cell
-def _():
-    # for notebook in notebooks:
-    #     print("Name: " , notebook[0], "Link: ", notebook[1], "Types: ", notebook[2], "Thumbnail: ", notebook[3], "Tags: ", notebook[4])
-    return
-
-
-@app.cell
-def _():
-    return
+    import marimo as mo
+    import pandas as pd
+    import os
+    return mo, os, pd
 
 
 if __name__ == "__main__":

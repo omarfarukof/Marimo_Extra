@@ -1,5 +1,0 @@
-Name,NB_Path,HTML_Path,Type,Thumbnail,Tags
-Fibonacci,notebooks/fibonacci.py,notebooks/fibonacci.html,notebooks,notebooks/public/thumbnail/fibonacci.png,
-Penguins,notebooks/penguins.py,notebooks/penguins.html,notebooks,notebooks/public/thumbnail/penguins.png,
-Charts,apps/charts.py,apps/charts.html,apps,apps/public/thumbnail/charts.png,
-Home,index.py,index.html,html-app,,

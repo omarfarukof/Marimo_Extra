@@ -81,13 +81,50 @@ def export_notebook(notebook_path: str, notebook_type: str, html_output_path: st
     return False
 
 def _nb_path_html2py(notebook_path: list[str]) -> str:
+    """
+    Replace the ".html" extension with ".py" for a given list of notebook paths.
+
+    Args:
+        notebook_path (list[str]): A list of notebook paths.
+
+    Returns:
+        list[str]: A list of notebook paths with ".html" replaced with ".py".
+    """
     return [path.replace(".html", ".py") for path in notebook_path]
 def _search_dict_of_lists(dict_of_lists, value):
+    """
+    Searches for a value in a dictionary of lists and returns the key associated with
+    the first list that contains the value.
+
+    Args:
+        dict_of_lists (dict): A dictionary where the values are lists.
+        value (any): The value to search for.
+
+    Returns:
+        str: The key associated with the first list that contains the value, or "html" if
+            the value is not found.
+    """
     for key, lst in dict_of_lists.items():
         if value in lst:
             return key
     return "html"
 def _nb_type_encoder(notebook_type: list[str]) -> str:
+    """
+    Encodes a list of notebook types into a list of strings.
+
+    Given a list of notebook types, this function will convert each type into a string
+    based on the following mapping:
+
+        - "app" to "app"
+        - "exe" to "exe"
+        - "edit" to "edit"
+        - "html" to "html"
+        - "html-save" to "html-save"
+        - "html-nocode" to "html-nocode"
+
+    Returns:
+        list[str]: A list of strings corresponding to the input notebook types.
+    """
     type_web = {
         "app": ["app", "apps", "application", "applications"],
         "exe": ["run", "exe", "executable", "executables"],
@@ -96,18 +133,12 @@ def _nb_type_encoder(notebook_type: list[str]) -> str:
         "html-save": ["html-save", "htmls-save", "website-save", "websites-save", "web-save", "webs-save", "save", "__marimo__"],
         "html-nocode": ["html-nocode", "htmls-nocode", "html-app"]
     }
-    # type_app = ["app", "apps", "application", "applications"]
-    # type_exe = ["run", "exe", "executable", "executables"]
-    # type_edit = ["edit", "editable", "editor", "editors"]
-    # type_html = ["html", "htmls", "website", "websites", "web", "webs"]
-    # type_html_save = ["html-save", "htmls-save", "website-save", "websites-save", "web-save", "webs-save", "save", "__marimo__"]
-    # type_html_nocode = ["html-nocode", "htmls-nocode", "html-app"]
     
     out_type = []
     for nb_type in notebook_type:
         out_type.append(_search_dict_of_lists(type_web, nb_type))
     return out_type
-# def auto_export_notebooks_web(notebook_dir: list[str], output_dir: str="_site" , index_csv_path: str="public/index.csv") -> bool:
+
 def auto_export_notebooks_web(index_csv_path: str="public/index.csv") -> bool:
     """
     Automatically exports notebooks from the specified directories.
@@ -133,12 +164,6 @@ def auto_export_notebooks_web(index_csv_path: str="public/index.csv") -> bool:
         notebook_html_path = notebook_df["HTML_Path"].values
         notebook_type = notebook_df["Type"].values
 
-    # else:
-        # notebook_dict = collect_notebooks_info(notebook_dir)
-        # notebook_path = [notebook["path"] for notebook in notebook_dict]
-        # notebook_type = [notebook["dir"] for notebook in notebook_dict]
-
-    # notebook_path = _nb_path_html2py(notebook_path)
     notebook_type = _nb_type_encoder(notebook_type)
     for nb_path, html_path, nb_type in zip(notebook_path, notebook_html_path, notebook_type):
         export_notebook(notebook_path = nb_path, html_output_path=html_path, notebook_type = nb_type)
@@ -173,6 +198,16 @@ def _add_row_csv(out, out_dict):
     return out
 
 def _save_record_csv(out, output_csv):
+    """
+    Saves the given dataframe to a CSV file.
+
+    Args:
+        out (pd.DataFrame): The dataframe to save.
+        output_csv (str): The path to the CSV file to save to.
+
+    Returns:
+        bool: True if the save was successful, False otherwise.
+    """
     try:
         out.to_csv(output_csv, index=False)
         rich_print(f"[green]Successfully Recoded[end] Index to {output_csv}")
@@ -181,6 +216,26 @@ def _save_record_csv(out, output_csv):
         rich_print(f"[red]Unexpected error Recording[end] Index: {e}")
         return False
 def record_csv(dirs: list[str] , output_csv = os.path.join("public" , "index.csv"), replace: bool=False, output=False):
+    """
+    Records information about notebooks in specified directories to a CSV file.
+
+    This function scans the specified directories for notebook files, collects
+    their information, and records it into a CSV file with specified columns.
+    If the CSV file already exists, it can either replace it or skip the
+    recording based on the `replace` argument.
+
+    Args:
+        dirs (list[str]): A list of directories to search for notebook files.
+        output_csv (str): The path to the CSV file to save to. Defaults to "public/index.csv".
+        replace (bool): If True, replaces the existing CSV file. Defaults to False.
+        output (bool): If True, returns the DataFrame instead of saving it to a CSV file. Defaults to False.
+
+    Returns:
+        bool or pd.DataFrame: True if the CSV was successfully saved, or the
+        DataFrame if `output` is True. If the CSV file already exists and
+        `replace` is False, returns True without saving.
+    """
+
     if os.path.exists(output_csv) and not replace:
         rich_print(f"[red]Warning:[end] File already exists: {output_csv}")
         return True
@@ -194,27 +249,3 @@ def record_csv(dirs: list[str] , output_csv = os.path.join("public" , "index.csv
     if output:
         return out
     return _save_record_csv(out, output_csv)
-
-
-def test():
-    output_dir = "_site"
-    if os.path.exists(output_dir): 
-        shutil.rmtree(output_dir)
-        rich_print(f"Removed [blue]{output_dir}[end] folder")
-    else:
-        print("No Folder Found")
-
-    record_csv(["notebooks", "apps"])
-    auto_export_notebooks_web(["notebooks", "apps"], output_dir=output_dir)
-    export(notebook_path="index.py", output="_site/index.html", show_code=False)
-    # export_html(notebook_path="notebooks/fibonacci.py", output="_site/notebooks/fibonacci.html", show_code=False, from_saved=True)
-
-    # # Run Server
-    # python -m http.server -d _site
-    # or
-    # uv run python -m http.server -d _site
-    pass
-
-if __name__ == "__main__":
-    test()
-    pass

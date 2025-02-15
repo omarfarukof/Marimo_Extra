@@ -28,19 +28,43 @@ def _(me, mo):
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(me):
     me.ui.Gallery(me.index_csv_to_dict())
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _():
-    import marimo_extra as me
-    return (me,)
+    # Imports
+    return
 
 
-@app.cell(hide_code=True)
+@app.cell
+async def _(mo, running_in_server):
+    _marimo_extra_version = '1.0.0'
+    if running_in_server():
+        try:
+            import micropip
+            pkg = mo.notebook_location() / 'public' / f"marimo_extra-{_marimo_extra_version}-py3-none-any.whl"
+            await micropip.install(str(pkg))
+            import marimo_extra as me
+        except Exception as e:
+            print('failed to install marimo_extra')
+            print(e)
+    else:
+        import marimo_extra as me
+    return me, micropip, pkg
+
+
+@app.cell
+def _(mo):
+    def running_in_server():
+        return str(mo.notebook_location())[:4] == "http"
+    return (running_in_server,)
+
+
+@app.cell
 def _():
     import marimo as mo
     import pandas as pd

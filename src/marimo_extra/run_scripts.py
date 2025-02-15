@@ -29,7 +29,7 @@ def run_website_build():
     else:
         print("No scripts/website_build.py found")
 
-def run_web_server():
+def run_local_server():
     """
     Runs the web server for the website by running the uv command
     "uv run -m http.server -d _site".
@@ -49,7 +49,7 @@ def _run_uv_build():
 
     os.system("uv build")
 
-def run_web():
+def run_local_web():
     """
     Executes the sequence of scripts to build and run the web server.
 
@@ -61,9 +61,9 @@ def run_web():
 
     run_gen_index_csv()
     run_website_build()
-    run_web_server()
+    run_local_server()
 
-def run_build_web():
+def run_build_local_web():
     """
     Builds the project and runs the web server.
 
@@ -71,7 +71,7 @@ def run_build_web():
     and then runs the web server to serve the generated website.
     """
     _run_uv_build()
-    run_web()
+    run_local_web()
 
 def run_test_build():
     """

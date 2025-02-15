@@ -1,6 +1,6 @@
 [project]
 name = "marimo-extra"
-version = "1.0.2"
+version = "1.0.3"
 description = "Add your description here"
 readme = "README.md"
 authors = [
@@ -27,9 +27,9 @@ dev = [
 [project.scripts]
 gen_index_csv = "marimo_extra.run_scripts:run_gen_index_csv"
 website_build = "marimo_extra.run_scripts:run_website_build"
-web_server = "marimo_extra.run_scripts:run_web_server"
-web = "marimo_extra.run_scripts:run_web"
-build_web = "marimo_extra.run_scripts:run_build_web"
+local_server = "marimo_extra.run_scripts:run_local_server"
+local_web = "marimo_extra.run_scripts:run_local_web"
+build_local_web = "marimo_extra.run_scripts:run_build_local_web"
 test = "marimo_extra.run_scripts:run_test_build"
 
 

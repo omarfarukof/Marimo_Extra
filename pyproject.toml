@@ -21,3 +21,7 @@ dev = [
     "altair>=5.5.0",
     "watchdog>=6.0.0",
 ]
+
+[project.scripts]
+gen_index_csv = "marimo-extra.run_scripts:run_gen_index_csv"
+website_build = "marimo-extra.run_scripts:run_website_build"

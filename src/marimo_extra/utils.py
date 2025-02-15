@@ -66,7 +66,7 @@ def _filter_out_data(notebooks: pd.DataFrame, filter_out_data: dict[list[str]]) 
         filter_index = filter_index[~notebooks[key].isin(value)]
     return notebooks.loc[filter_index]
 def index_csv_to_dict(
-    index_csv_path: str=os.path.join('public', 'index.csv'),
+    index_csv_path: str=os.path.join(str(mo.notebook_location()), 'public', 'index.csv'),
     index_to_dict_names = {
         'Name': 'name',
         'HTML_Path': 'link',
@@ -116,7 +116,7 @@ def index_csv_to_dict(
     return notebooks.fillna("").to_dict('records')
 
 def index_csv_to_nav_dict(
-    home_dir: str = os.path.basename(str(mo.notebook_dir())),
+    home_dir: str = os.path.basename(str(mo.notebook_location())),
     index_csv_path: str=os.path.join('public', 'index.csv'),
     index_names = {
         'name': 'Name',
@@ -124,14 +124,12 @@ def index_csv_to_nav_dict(
     },
     filter_out_data= {
         "Name": ['Home']
-        }
-) -> dict:
+        } ) -> dict:
     _nb = pd.read_csv(index_csv_path)
     _nb = _filter_out_data(_nb, filter_out_data)[index_names.values()]
     _nb[index_names['link']] = _nb[index_names['link']].apply(lambda x: os.path.join(" ", home_dir, x).replace(" ",""))
 
     return dict( zip( _nb[index_names['link']], _nb[index_names['name']] ) )
-
 
 
     

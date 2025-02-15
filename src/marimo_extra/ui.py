@@ -1,6 +1,6 @@
 import marimo as mo
-import numpy as np
-import pandas as pd
+# import numpy as np
+# import pandas as pd
 from marimo_extra.utils import index_csv_to_dict
 
 color = {
@@ -15,8 +15,8 @@ def card(
     thumbnail=None, 
     content=None , 
     link="", 
-    thum_width=200, 
-    thum_height=150,
+    thumbnail_width=200, 
+    thumbnail_height=150,
     gap=0.2 ):
     if isinstance(name, list):
         thumbnail = name[1]
@@ -31,11 +31,11 @@ def card(
 
     thumbnail = mo.image(
         src=thumbnail, alt=f"{name}", 
-        rounded=True, width=thum_width, height=thum_height )
+        rounded=True, width=thumbnail_width, height=thumbnail_height )
 
     _open_button = frame(
         content=mo.md(f"<a href=\"{link}\">&nbsp; Open &nbsp;</a>\n"), 
-        padding=0 , border_color="#CCFFCC", border_width=1, border_redius=7, 
+        padding=0 , border_color="#CCFFCC", border_width=1, border_radius=7, 
         bg_color="#CCFFCC" )
     _buttons = mo.hstack([_open_button] , gap=0.2)
     
@@ -53,17 +53,17 @@ def Gallery(data: list[dict] , max_column=2 , v_gap=2, h_gap=2, orientation = "v
     search_box = mo.ui.text(
         placeholder="Search", 
         label=f"{mo.icon('lucide:search')}",
-        on_change=lambda x: _gallary_view()
+        on_change=lambda x: _gallery_view()
         )
     orientation_box = mo.ui.dropdown( 
         label="Orientation" , 
         options=["vertical" , "horizontal", "mixed"] , 
         value=orientation,
-        on_change=lambda x: _gallary_view()
+        on_change=lambda x: _gallery_view()
         ) 
     controller = mo.hstack([search_box, orientation_box])
 
-    def _gallary_view():
+    def _gallery_view():
         orientation = orientation_box.value
         search = search_box.value
 
@@ -115,5 +115,5 @@ def _get_cards(search=""):
     return cards
 
 
-def frame(content, box_min_width=10, box_min_height=10, padding=5, border_width=2, border_redius=10 , border_type="solid", border_color="#CCCCCC", bg_color="", margin_size=10):
-    return mo.Html( f"<div style='min-width: {box_min_width}px; min-height: {box_min_height}px; background-color: {bg_color}; border: {border_width}px {border_type} {border_color}; border-radius: {border_redius}px; padding: {padding}px;'> {content} </div>" )
+def frame(content, box_min_width=10, box_min_height=10, padding=5, border_width=2, border_radius=10 , border_type="solid", border_color="#CCCCCC", bg_color="", margin_size=10):
+    return mo.Html( f"<div style='min-width: {box_min_width}px; min-height: {box_min_height}px; background-color: {bg_color}; border: {border_width}px {border_type} {border_color}; border-radius: {border_radius}px; padding: {padding}px;'> {content} </div>" )

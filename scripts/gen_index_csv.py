@@ -10,7 +10,7 @@ def gen_index_csv():
 
     index_csv = me.add_row_csv(
         index_csv, 
-        ["Home", "index.py", "index.html", "html-app", "", ""])
+        ["Home", "index.py", "index.html", "app", "", ""])
 
     me._save_record_csv(index_csv, index_csv_path)
     

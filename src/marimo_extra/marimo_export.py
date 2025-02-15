@@ -19,6 +19,17 @@ format_ext = {
 }
 
 def _get_xcmd_html(cmd, sandbox, show_code):
+    """
+    Modify the export command to generate an HTML file.
+
+    Args:
+        cmd (list): The base export command.
+        sandbox (bool): If True, add the --sandbox flag.
+        show_code (bool): If True, add the --include-code flag.
+
+    Returns:
+        list: The modified command.
+    """
     if sandbox:
         cmd.append("--sandbox")
 
@@ -29,6 +40,19 @@ def _get_xcmd_html(cmd, sandbox, show_code):
     return cmd
 
 def _get_xcmd_ipynb(cmd, sandbox, show_code, sort):
+    """
+    Modify the export command to generate an IPYNB file.
+
+    Args:
+        cmd (list): The base export command.
+        sandbox (bool): If True, add the --sandbox flag.
+        show_code (bool): If True, add the --include-code flag.
+        sort (str): The sorting method, either 'topological' or 'top-down'.
+
+    Returns:
+        list: The modified command.
+    """
+
     if sandbox:
         cmd.append("--sandbox")
 
@@ -43,6 +67,17 @@ def _get_xcmd_ipynb(cmd, sandbox, show_code, sort):
     return cmd
 
 def _get_xcmd_wasm(cmd, mode, show_code):
+    """
+    Modify the export command to generate an HTML-WASM file.
+
+    Args:
+        cmd (list): The base export command.
+        mode (str): The export mode, either 'run' or 'edit'.
+        show_code (bool): If True, add the --show-code flag; otherwise, add the --no-show-code flag.
+
+    Returns:
+        list: The modified command.
+    """
     if mode not in ["run", "edit"]:
         raise ValueError("mode must be either 'run' or 'edit'")
 
@@ -62,6 +97,34 @@ def get_export_cmd(
     sort:str="topological"      # topological, top-down
     ) -> list[str]:
 
+    """
+    Generate the command to export a notebook using Marimo.
+
+    Args:
+        notebook_path (str): The path to the notebook file.
+        output (str, optional): The path to the output file. Defaults to None.
+        export_format (str, optional): The format to export the notebook to. Defaults to "html".
+            Choices:
+                - "html": Export to a static HTML file.
+                - "html-wasm": Export to an HTML file with WebAssembly support.
+                - "ipynb": Export to an IPython notebook file.
+                - "md": Export to a Markdown file.
+                - "script": Export to a Python script file.
+        mode (str, optional): The export mode. Defaults to "run".
+            Choices:
+                - "run": Export the notebook in a form that can be run.
+                - "edit": Export the notebook in a form that can be edited.
+        show_code (bool, optional): If True, include the code in the exported notebook. Defaults to True.
+        watch (bool, optional): If True, watch the notebook for changes and automatically export. Defaults to False.
+        sandbox (bool, optional): If True, export the notebook in a sandboxed environment. Defaults to False.
+        sort (str, optional): The sorting method for the exported notebook. Defaults to "topological".
+            Choices:
+                - "topological": Sort the notebook cells topologically.
+                - "top-down": Sort the notebook cells top-down.
+
+    Returns:
+        list[str]: The command to export the notebook.
+    """
     if output is None:
         output = notebook_path.replace(".py", format_ext[export_format])
         
@@ -88,6 +151,18 @@ def get_export_cmd(
     return cmd
 
 def _html_copy_process(notebook_path, output, saved_html_path=None):
+    """
+    Copies a saved HTML file to the specified output path.
+
+    Args:
+        notebook_path (str): The path to the notebook file.
+        output (str): The path to the output file.
+        saved_html_path (str, optional): The path to the saved HTML file to copy. Defaults to None.
+
+    Returns:
+        bool: True if the copy was successful, False otherwise.
+    """
+    
     if saved_html_path is None:
         saved_html_path = os.path.join(os.path.dirname(notebook_path),"__marimo__",os.path.basename(notebook_path).replace(".py", ".html"))
     
@@ -104,6 +179,17 @@ def _html_copy_process(notebook_path, output, saved_html_path=None):
         return False
 
 def _export_with_cmd(cmd, notebook_path, output):
+    """
+    Runs a command to export a notebook.
+
+    Args:
+        cmd (list[str]): The command to run.
+        notebook_path (str): The path to the notebook file.
+        output (str): The path to the output file.
+
+    Returns:
+        bool: True if the export was successful, False otherwise.
+    """
     try:
         subprocess.run(cmd, capture_output=True, text=True, check=True)
         rich_print(f"[green]Successfully Exported[end] {notebook_path} to {output}")
@@ -127,6 +213,43 @@ def export(
     ) -> bool:
 
 
+    """
+    Exports a notebook to a specified format and output location.
+
+    Args:
+        notebook_path (str): The path to the notebook file to be exported.
+        output (str, optional): The path to the output file. If not provided, 
+            it defaults to the notebook path with an appropriate extension.
+        export_format (str, optional): The format to export the notebook to.
+            Defaults to "html". Options include:
+                - "html": Static HTML file.
+                - "html-wasm": HTML file with WebAssembly support.
+                - "ipynb": IPython notebook file.
+                - "md": Markdown file.
+                - "script": Python script file.
+        mode (str, optional): The export mode. Defaults to "run".
+            Options include:
+                - "run": Export the notebook in a runnable form.
+                - "edit": Export the notebook in an editable form.
+        show_code (bool, optional): Whether to include the code in the exported 
+            notebook. Defaults to True.
+        watch (bool, optional): Whether to watch the notebook for changes and 
+            automatically export. Defaults to False.
+        sandbox (bool, optional): Whether to export the notebook in a sandboxed 
+            environment. Defaults to False.
+        sort (str, optional): The method to sort the exported notebook cells.
+            Defaults to "topological". Options include:
+                - "topological": Sort cells topologically.
+                - "top-down": Sort cells top-down.
+        from_saved (bool, optional): Whether to export from a saved HTML file. 
+            Defaults to False.
+        saved_html_path (str, optional): The path to the saved HTML file to copy 
+            if `from_saved` is True. Defaults to None.
+
+    Returns:
+        bool: True if the export was successful, False otherwise.
+    """
+
     if output is None:
         output = notebook_path.replace(".py", format_ext[export_format])
     os.makedirs(os.path.dirname(output), exist_ok=True)
@@ -141,6 +264,20 @@ def export(
 
 
 def export_executable(notebook_path: str, output: str=None, watch=False, sandbox=False) -> bool:
+    """
+    Exports a notebook as an executable notebook.
+
+    Args:
+        notebook_path (str): The path to the notebook file.
+        output (str, optional): The path to the output file. Defaults to None.
+        watch (bool, optional): Whether to watch the notebook for changes and 
+            automatically export. Defaults to False.
+        sandbox (bool, optional): Whether to export the notebook in a sandboxed 
+            environment. Defaults to False.
+
+    Returns:
+        bool: True if the export was successful, False otherwise.
+    """
     rich_print(f"\n[yellow]Exporting[end] to [blue]Executable[end]: {notebook_path}")
     return export(
         notebook_path=notebook_path,
@@ -154,6 +291,18 @@ def export_executable(notebook_path: str, output: str=None, watch=False, sandbox
     )
 
 def export_editable(notebook_path: str, output: str=None, watch=False) -> bool:
+    """
+    Exports a notebook as an editable notebook.
+
+    Args:
+        notebook_path (str): The path to the notebook file.
+        output (str, optional): The path to the output file. Defaults to None.
+        watch (bool, optional): Whether to watch the notebook for changes and 
+            automatically export. Defaults to False.
+
+    Returns:
+        bool: True if the export was successful, False otherwise.
+    """
     rich_print(f"\n[yellow]Exporting[end] to [blue]Editable[end]: {notebook_path}")
     return export(
         notebook_path=notebook_path,
@@ -165,6 +314,16 @@ def export_editable(notebook_path: str, output: str=None, watch=False) -> bool:
     )
 
 def export_app(notebook_path: str, output: str=None) -> bool:
+    """
+    Exports a notebook as a standalone app.
+
+    Args:
+        notebook_path (str): The path to the notebook file.
+        output (str, optional): The path to the output file. Defaults to None.
+
+    Returns:
+        bool: True if the export was successful, False otherwise.
+    """
     rich_print(f"\n[yellow]Exporting[end] to [blue]App[end]: {notebook_path}")
     return export(
         notebook_path=notebook_path,
@@ -175,6 +334,24 @@ def export_app(notebook_path: str, output: str=None) -> bool:
     )
 
 def export_html(notebook_path: str, output: str=None, output_dir: str="_site", show_code:bool=True, from_saved:bool=False, saved_html_path=None) -> bool:
+    """
+    Exports a notebook to HTML format.
+
+    Args:
+        notebook_path (str): The path to the notebook file.
+        output (str, optional): The path to the output file. Defaults to None.
+        output_dir (str, optional): The directory where the exported HTML file will
+            be saved. Defaults to "_site".
+        show_code (bool, optional): Whether to include the code in the exported 
+            notebook. Defaults to True.
+        from_saved (bool, optional): Whether to export from a saved HTML file. 
+            Defaults to False.
+        saved_html_path (str, optional): The path to the saved HTML file to copy 
+            if `from_saved` is True. Defaults to None.
+
+    Returns:
+        bool: True if the export was successful, False otherwise.
+    """
     rich_print(f"\n[yellow]Exporting[end] to [blue]HTML{"-save" if from_saved else ""}[end]: {notebook_path}")
     return export(
         notebook_path=notebook_path,
@@ -184,28 +361,3 @@ def export_html(notebook_path: str, output: str=None, output_dir: str="_site", s
         from_saved=from_saved,
         saved_html_path=saved_html_path
     )
-
-
-def test(file_name):
-    output_dir = "_site"
-    if os.path.exists(output_dir): 
-        shutil.rmtree(output_dir)
-        rich_print(f"Removed [blue]{output_dir}[end] folder")
-    output = f"_site/{file_name.replace('.py', '')}"
-
-    export(notebook_path=file_name, output=f"{output}.html")
-    export_executable(notebook_path=file_name, output=f"{output}_exe.html")
-    export_editable(notebook_path=file_name, output=f"{output}_edit.html")
-    export_app(notebook_path=file_name, output=f"{output}_app.html")
-    export_html(notebook_path=file_name, output=f"{output}_html.html")
-    export_html(notebook_path=file_name, output=f"{output}_saved_html.html", from_saved=True)
-
-    # # Run Server
-    # python -m http.server -d _site
-    # or
-    # uv run python -m http.server -d _site
-
-# # For Testing
-if __name__ == "__main__":
-    # test("notebooks/fibonacci.py")
-    pass

@@ -1,6 +1,4 @@
 import marimo as mo
-# import numpy as np
-# import pandas as pd
 from marimo_extra.utils import index_csv_to_dict
 
 color = {
@@ -18,6 +16,21 @@ def card(
     thumbnail_width=200, 
     thumbnail_height=150,
     gap=0.2 ):
+    """
+    Generate a card with title bar and buttons.
+
+    Parameters:
+        name (str): The name of the card.
+        thumbnail (str): The path to the thumbnail. Defaults to None.
+        content (str): The content of the card. Defaults to None.
+        link (str): The link to the card. Defaults to an empty string.
+        thumbnail_width (int): The width of the thumbnail. Defaults to 200.
+        thumbnail_height (int): The height of the thumbnail. Defaults to 150.
+        gap (float): The gap between vertical elements [ thumbnail, content, title bar ]. Defaults to 0.2.
+
+    Returns:
+        Card View: A marimo frame representing the card.
+    """
     if isinstance(name, list):
         thumbnail = name[1]
         content = name[2]
@@ -50,6 +63,48 @@ def card(
 
 
 def Gallery(data: list[dict] , max_column=2 , v_gap=2, h_gap=2, orientation = "vertical"):
+    """
+    A function to generate a gallery view of cards based on the given data.
+
+    It takes a list of dictionaries as an argument, where each dictionary
+    represents a card. The dictionary should contain the following keys:
+    - name: The name of the card.
+    - thumbnail: The thumbnail of the card.
+    - content: The content of the card.
+    - link: The link of the card.
+
+    It will display a search box and an orientation box above the gallery view.
+    The search box allows users to search for cards by name, and the orientation
+    box allows users to change the orientation of the cards.
+
+    The gallery view will be updated based on the search query and the orientation.
+
+    If the search query is empty, it will display all the cards.
+
+    If the search query is not empty, but there is no matching card, it will
+    display a "No results" message.
+
+    Parameters
+    ----------
+    data : list[dict]
+        A list of dictionaries representing the cards to display.
+    max_column : int
+        The maximum number of columns to display in the gallery view.
+        Defaults to 2.
+    v_gap : float
+        The vertical gap between the cards in the gallery view.
+        Defaults to 2.
+    h_gap : float
+        The horizontal gap between the cards in the gallery view.
+        Defaults to 2.
+    orientation : str
+        The orientation of the cards in the gallery view. Can be "vertical",
+        "horizontal", or "mixed". Defaults to "vertical".
+
+    Returns
+    -------
+    None
+    """
     search_box = mo.ui.text(
         placeholder="Search", 
         label=f"{mo.icon('lucide:search')}",
@@ -64,6 +119,21 @@ def Gallery(data: list[dict] , max_column=2 , v_gap=2, h_gap=2, orientation = "v
     controller = mo.hstack([search_box, orientation_box])
 
     def _gallery_view():
+        """
+        A function to update the gallery view based on the search query.
+
+        It takes no argument, but it updates the gallery view by reading the search
+        query from the search box and the orientation from the orientation box.
+
+        It appends the search query to the output, and then appends the card view
+        based on the search query and the orientation.
+
+        If the search query is empty, it will display all the cards.
+
+        If the search query is not empty, but there is no matching card, it will
+        display a "No results" message.
+
+        """
         orientation = orientation_box.value
         search = search_box.value
 
@@ -72,7 +142,7 @@ def Gallery(data: list[dict] , max_column=2 , v_gap=2, h_gap=2, orientation = "v
         if search != "":
             mo.output.append( mo.md(f"Search: {search}") )
 
-        cards = _get_cards(search=search)
+        cards = _get_cards(index_csv_to_dict(search=search))
 
         if len(cards) == 0:
             mo.output.append( mo.md("<div style=\"text-align: center;\">No results</div>"))
@@ -80,10 +150,20 @@ def Gallery(data: list[dict] , max_column=2 , v_gap=2, h_gap=2, orientation = "v
         _card_view(cards, orientation)
 
     def _card_view(cards, orientation):
+        """
+        Render a list of cards in a specific orientation.
+
+        Parameters
+        ----------
+        cards : list[mo.Card]
+            List of cards to render.
+        orientation : str
+            Orientation of the card. Can be "vertical", "horizontal", or "mixed".
+        """
         if orientation == "vertical":
             mo.output.append( mo.vstack(cards, gap=v_gap) )
         elif orientation == "horizontal":
-            mo.output.append( mo.hstack(cards, gap=h_gap) )
+            mo.output.append( mo.hstack(cards, gap=h_gap, justify="start") )
         elif orientation == "mixed":
             _view = []
             for i in range(0, len(cards), max_column):
@@ -95,15 +175,21 @@ def Gallery(data: list[dict] , max_column=2 , v_gap=2, h_gap=2, orientation = "v
 
 
 
-def _get_cards(search=""):
+def _get_cards(card_dict: list[dict]= index_csv_to_dict()):
     """
-    Get a list of marimo cards based on the current index.csv file.
+    Convert a list of card dictionaries into a list of card widgets.
 
+    Args:
+        card_dict (list[dict]): A list of dictionaries containing the following keys:
+            - name (str): The name of the card.
+            - thumbnail (str): The path to the thumbnail.
+            - content (str): The content of the card.
+            - link (str): The link to the card.
     Returns:
-        list: A list of marimo cards.
+        list[mo.Html]: A list of card widgets.
     """
     cards = []
-    for item in index_csv_to_dict(search=search):
+    for item in card_dict:
         cards.append(
             card(
                 name=item["name"],

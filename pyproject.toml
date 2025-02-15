@@ -1,6 +1,6 @@
 [project]
 name = "marimo-extra"
-version = "0.2.0"
+version = "1.0.0"
 description = "Add your description here"
 readme = "README.md"
 authors = [
@@ -10,6 +10,7 @@ requires-python = ">=3.12"
 dependencies = [
     "marimo>=0.11.0",
     "pandas>=2.2.3",
+    "requests>=2.32.3",
 ]
 
 [build-system]
@@ -19,9 +20,20 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = [
     "altair>=5.5.0",
+    "polars>=1.22.0",
     "watchdog>=6.0.0",
 ]
 
 [project.scripts]
 gen_index_csv = "marimo_extra.run_scripts:run_gen_index_csv"
 website_build = "marimo_extra.run_scripts:run_website_build"
+web_server = "marimo_extra.run_scripts:run_web_server"
+web = "marimo_extra.run_scripts:run_web"
+build_web = "marimo_extra.run_scripts:run_build_web"
+test = "marimo_extra.run_scripts:run_test_build"
+
+
+# [[tool.uv.index]]
+# name = "testpypi"
+# url = "https://test.pypi.org/simple/"
+# publish-url = "https://test.pypi.org/legacy/"

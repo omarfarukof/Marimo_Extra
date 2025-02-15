@@ -15,7 +15,6 @@ def build_website(fresh_build=False):
         _fresh_web_build(output_dir)
 
     me.auto_export_notebooks_web()
-    # me.export(notebook_path="index.py", output="_site/index.html", show_code=False)
 
 
 if __name__ == "__main__":

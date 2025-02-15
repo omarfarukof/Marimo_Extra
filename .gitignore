@@ -9,5 +9,8 @@ wheels/
 # Virtual environments
 .venv
 
-# Marimo Export
+# Marimo Extra
 _site
+public/index.csv
+*.whl
+*.tar.gz

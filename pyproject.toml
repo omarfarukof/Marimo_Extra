@@ -23,5 +23,5 @@ dev = [
 ]
 
 [project.scripts]
-gen_index_csv = "marimo-extra.run_scripts:run_gen_index_csv"
-website_build = "marimo-extra.run_scripts:run_website_build"
+gen_index_csv = "marimo_extra.run_scripts:run_gen_index_csv"
+website_build = "marimo_extra.run_scripts:run_website_build"

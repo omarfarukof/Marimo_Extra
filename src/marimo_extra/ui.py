@@ -10,7 +10,14 @@ color = {
     "light_green": "#CCFFCC"
 }
 
-def card(name: str|list, thumbnail=None, content=None , link="", thum_width=200, thum_height=150):
+def card(
+    name: str|list, 
+    thumbnail=None, 
+    content=None , 
+    link="", 
+    thum_width=200, 
+    thum_height=150,
+    gap=0.2 ):
     if isinstance(name, list):
         thumbnail = name[1]
         content = name[2]
@@ -21,14 +28,25 @@ def card(name: str|list, thumbnail=None, content=None , link="", thum_width=200,
             thumbnail = mo.md(f"<i> {name} </i>")
         if content is None:
             content = mo.md(f"Details for {name}")
-    thumbnail = mo.image(src=thumbnail, alt=f"{name}", rounded=True, width=thum_width, height=thum_height)
-    open_link = frame(content=mo.md(f"<a href=\"{link}\">&nbsp; Open &nbsp;</a>\n"), padding=0 , border_color="#CCFFCC", border_width=1, border_redius=7, bg_color="#CCFFCC")
-    title_link = mo.md(f"<h3>{name}</h3>")
-    title = mo.hstack([title_link, open_link])
-    view = mo.md(f"{mo.center(thumbnail)}<br>{content}<br>{title}")
 
+    thumbnail = mo.image(
+        src=thumbnail, alt=f"{name}", 
+        rounded=True, width=thum_width, height=thum_height )
 
-    return frame(view, box_min_width=270, box_min_height=80)
+    _open_button = frame(
+        content=mo.md(f"<a href=\"{link}\">&nbsp; Open &nbsp;</a>\n"), 
+        padding=0 , border_color="#CCFFCC", border_width=1, border_redius=7, 
+        bg_color="#CCFFCC" )
+    _buttons = mo.hstack([_open_button] , gap=0.2)
+    
+    _title_name = mo.md(f"<h3>{name}</h3>")
+    _title_bar = mo.hstack([_title_name, _buttons])
+
+    # _view = mo.md(f"{mo.center(thumbnail)}<br>{content}<br>{_title_bar}")
+    _view = mo.vstack([mo.center(thumbnail),content,_title_bar], gap=gap)
+    _card = frame(_view, box_min_width=270, box_min_height=80)
+
+    return _card
 
 
 def Gallery(data: list[dict] , max_column=2 , v_gap=2, h_gap=2, orientation = "vertical"):

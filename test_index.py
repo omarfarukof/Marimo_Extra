@@ -42,7 +42,7 @@ def _():
 
 @app.cell
 async def _(mo, running_in_server):
-    _marimo_extra_version = '1.0.0'
+    _marimo_extra_version = '1.0.2'
     if running_in_server():
         try:
             import micropip

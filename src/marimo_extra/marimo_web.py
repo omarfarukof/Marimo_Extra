@@ -163,6 +163,9 @@ def auto_export_notebooks_web(index_csv_path: str="public/index.csv") -> bool:
         notebook_path = notebook_df["NB_Path"].values
         notebook_html_path = notebook_df["HTML_Path"].values
         notebook_type = notebook_df["Type"].values
+    else:
+        print(f"No index.csv file found at {index_csv_path}. Export will be skipped.")
+        return False
 
     notebook_type = _nb_type_encoder(notebook_type)
     for nb_path, html_path, nb_type in zip(notebook_path, notebook_html_path, notebook_type):

@@ -29,9 +29,14 @@ jobs:
       - name: 📦 Install dependencies
         run: |
           uv add marimo
+      
+      - name: 🛠️ Creating index.csv for notebooks
+        run: |
+          uv run gen_index_csv
+      
       - name: 🛠️ Export notebooks
         run: |
-          uv run scripts/website_build.py
+          uv run website_build
 
       - name: 📤 Upload artifact
         uses: actions/upload-pages-artifact@v3

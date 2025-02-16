@@ -28,10 +28,11 @@ jobs:
       - name: Generate static site
         run: uv run scripts/test_deploy.py
 
+      - name: Install Netlify CLI
+        run: npm install -g netlify-cli
+
       - name: Deploy to Netlify
-        uses: netlify/actions@v2
-        with:
-          args: deploy --dir=_site --prod
+        run: netlify deploy --dir=_site --prod
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}  # Optional: If you want to specify a site ID

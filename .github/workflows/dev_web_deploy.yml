@@ -48,7 +48,7 @@ jobs:
 
     environment:
       name: github-pages
-      url: https://${{ github.actor }}.github.io/${{ github.event.branch }}_${{ github.event.repository.name }}
+      url: https://${{ github.actor }}.github.io/dev_${{ github.event.repository.name }}
       # url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:

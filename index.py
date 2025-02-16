@@ -48,5 +48,35 @@ def _():
     return mo, os, pd
 
 
+@app.cell
+def _(mo):
+    mo.md(r"""# Testing""")
+    return
+
+
+@app.cell
+def _(mo, pd):
+    pd.read_csv(str(mo.notebook_location() / "public" / "penguins.csv"))
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md( f"[penguins]({str(mo.notebook_location() / "public" / "penguins.csv")})" )
+    return
+
+
+@app.cell
+def _(mo, pd):
+    pd.read_csv(str(mo.notebook_location() / "notebooks" / "public" / "penguins.csv"))
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md( f"[penguins]({str(mo.notebook_location() / "notebooks" / "public" / "penguins.csv")})" )
+    return
+
+
 if __name__ == "__main__":
     app.run()

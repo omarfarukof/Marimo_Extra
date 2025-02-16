@@ -48,5 +48,42 @@ def _():
     return mo, os, pd
 
 
+@app.cell
+def _(mo):
+    mo.md(r"""# Testing""")
+    return
+
+
+@app.cell
+def _(mo, pd):
+    pd.read_csv(str(mo.notebook_location() / "public" / "penguins.csv"))
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md( f"[penguins]({str(mo.notebook_location() / "public" / "penguins.csv")})" )
+    return
+
+
+@app.cell
+def _(mo, pd):
+    pd.read_csv(str(mo.notebook_location() / "notebooks" / "public" / "penguins.csv"))
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md( f"[penguins]({str(mo.notebook_location() / "notebooks" / "public" / "penguins.csv")})" )
+    # import requests
+    # import io
+    # url = str(mo.notebook_location() / "notebooks" / "public" / "penguins.csv")
+    # print(type(url), url)
+    # s = requests.get('https://omarfarukof.github.io/Marimo_Extra/notebooks/public/penguins.csv').content
+    # c = pd.read_csv(io.StringIO(s.decode('utf-8')))
+    # c
+    return
+
+
 if __name__ == "__main__":
     app.run()

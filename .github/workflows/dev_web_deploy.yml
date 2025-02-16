@@ -1,23 +1,18 @@
-name: Deploy to Netlify for dev
+name: Deploy to Netlify
 
 on:
   push:
-    branches: ['dev']
-  workflow_dispatch:
-
-concurrency:
-  group: 'pages'
-  cancel-in-progress: false
-
-env:
-  UV_SYSTEM_PYTHON: 1
+    branches:
+      - main  # Change this to your default branch if it's not 'main'
 
 jobs:
-  test_build:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
       - name: 🚀 Install uv
         uses: astral-sh/setup-uv@v4
 
@@ -26,36 +21,17 @@ jobs:
         with:
           python-version: 3.12
 
-      - name: 📦 Install dependencies
-        run: |
-          uv add marimo
-      
-      - name: 🛠️ Test Deplay
-        run: |
-          uv run scripts/test_deploy.py
+      - name: Install dependencies
+        run: uv add marimo
+          
 
-      - name: 📤 Upload artifact
-        uses: actions/upload-artifact@v3
+      - name: Generate static site
+        run: uv run scripts/test_deploy.py
+
+      - name: Deploy to Netlify
+        uses: netlify/actions/cli@v2
         with:
-          name: _site
-          path: _site
-
-  deploy:
-    needs: test_build
-
-    permissions:
-      pages: write
-      id-token: write
-
-    environment:
-      name: netlify
-      url: https://${{ github.actor }}.netlify.app/
-    runs-on: ubuntu-latest
-    steps:
-      - name: 🚀 Deploy to Netlify
-        uses: netlify/deploy@v1
-        with:
-          site-id: ${{ secrets.NETLIFY_SITE_ID }}
-          auth-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          prod: false
-          dir: _site
+          args: deploy --dir=_site --prod
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}  # Optional: If you want to specify a site ID

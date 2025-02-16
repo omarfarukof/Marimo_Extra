@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages for dev
+name: Deploy to Netlify for dev
 
 on:
   push:
@@ -35,8 +35,9 @@ jobs:
           uv run scripts/test_deploy.py
 
       - name: 📤 Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-artifact@v3
         with:
+          name: _site
           path: _site
 
   deploy:
@@ -47,11 +48,14 @@ jobs:
       id-token: write
 
     environment:
-      name: github-pages
-      url: https://${{ github.actor }}.github.io/dev_${{ github.event.repository.name }}
-      # url: ${{ steps.deployment.outputs.page_url }}
+      name: netlify
+      url: https://${{ github.actor }}.netlify.app/
     runs-on: ubuntu-latest
     steps:
-      - name: 🚀 Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: 🚀 Deploy to Netlify
+        uses: netlify/deploy@v1
+        with:
+          site-id: ${{ secrets.NETLIFY_SITE_ID }}
+          auth-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          prod: false
+          dir: _site
